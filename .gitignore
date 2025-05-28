@@ -331,4 +331,3 @@ __pycache__
 !tasks/daily_summary.py
 !tasks/month_summary.py
 !tasks/week_summary.py
-tasks/
