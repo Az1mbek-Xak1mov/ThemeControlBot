@@ -1,9 +1,23 @@
+import logging
+import asyncio
+
+from aiogram import Bot
+from aiogram.client.default import DefaultBotProperties
+import sys
+
+from aiogram.enums import ParseMode
+
 from bot.dispatcher import TOKEN
 from bot.handler import *
+from db.manager import db
 
 
 async def on_startup():
-    await create_database()
+    try:
+        await db.create_all()
+    except Exception as e:
+        logging.exception("Failed to create tables")
+        raise
 
 
 async def main() -> None:

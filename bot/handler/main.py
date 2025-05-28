@@ -1,19 +1,11 @@
-import asyncio
-import logging
-import sys
-from os import getenv
-from aiogram import Bot, Dispatcher, html, F
-from aiogram.client import bot
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
-from aiogram.types import Message
-from bot.dispatcher import dp
-from db.creating_db import create_database
-from db.manager import save_user, save_message, select_one, save_group, add_user_to_group
-from db.models import User
-from openpyxl import Workbook
 import datetime
+
+from aiogram.types import Message
+
+from bot.dispatcher import dp
+from db.manager import save_user, save_message, select_one, save_group, add_user_to_group
+
+
 @dp.message()
 async def handle_message(message: Message):
     if message.chat.type in ("group", "supergroup"):
@@ -39,4 +31,3 @@ async def handle_message(message: Message):
             "created_at": datetime.datetime.utcnow(),
         }
         await save_message(message_info)
-

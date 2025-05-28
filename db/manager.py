@@ -1,9 +1,11 @@
 import datetime
+
 from sqlalchemy import select, insert, func
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, Session
 
-from db.engine import engine
-from db.models import User, Message, Group, group_user
+from db.engine import engine, DB_URL
+from db.models import User, Message, Group, group_user, Base
 
 # Create a scoped session
 SessionLocal: sessionmaker = sessionmaker(bind=engine)
@@ -36,10 +38,12 @@ async def save_group(chat_id: int, title: str) -> Group:
     session.commit()
     return await select_group(chat_id)
 
+
 # ─── USERS ─────────────────────────────────────────────────────────────────
 
 async def get_all_users() -> list[User]:
     return session.execute(select(User)).scalars().all()
+
 
 async def select_one(user_chat_id: int) -> User | None:
     return session.execute(
@@ -70,10 +74,9 @@ async def save_message(values: dict):
 
 
 async def get_messages_for_group(
-    group: Group,
-    days: int
+        group: Group,
+        days: int
 ) -> list[Message]:
-
     return await get_messages_for_chat(group.chat_id, days)
 
 
@@ -81,9 +84,11 @@ async def get_messages_for_group(
 
 async def get_users_in_group(group: Group) -> list[User]:
     return group.users
+
+
 async def add_user_to_group(
-    user_chat_id: int,
-    group_chat_id: int
+        user_chat_id: int,
+        group_chat_id: int
 ):
     stmt = pg_insert(group_user).values(
         group_chat_id=group_chat_id,
@@ -95,6 +100,7 @@ async def add_user_to_group(
     session.execute(stmt)
     session.commit()
 
+
 async def get_user_objects_for_group(group_chat_id: int) -> list[User]:
     stmt = (
         select(User)
@@ -105,18 +111,47 @@ async def get_user_objects_for_group(group_chat_id: int) -> list[User]:
     )
     return session.execute(stmt).scalars().all()
 
-async def total_messages(from_date,group_chat_id):
+
+async def total_messages(from_date, group_chat_id):
     now = datetime.datetime.now()
-    date_from=now - datetime.timedelta(days=from_date)
-    query = select(func.count(Message.id)).where(Message.created_at > date_from,Message.chat_id==group_chat_id)
+    date_from = now - datetime.timedelta(days=from_date)
+    query = select(func.count(Message.id)).where(Message.created_at > date_from, Message.chat_id == group_chat_id)
     result = session.execute(query)
     return result.scalar()
 
 
-
-async def get_messages_for_chat(from_date,group_chat_id,user_chat_id) -> list[Message]:
+async def get_messages_for_chat(from_date, group_chat_id, user_chat_id) -> list[Message]:
     now = datetime.datetime.now()
-    date_from=now - datetime.timedelta(days=from_date)
-    query = select(func.count(Message.id)).where(Message.created_at > date_from,Message.chat_id==group_chat_id,Message.user_id==user_chat_id)
+    date_from = now - datetime.timedelta(days=from_date)
+    query = select(func.count(Message.id)).where(Message.created_at > date_from, Message.chat_id == group_chat_id,
+                                                 Message.user_id == user_chat_id)
     result = session.execute(query)
     return result.scalar()
+
+
+##################################33
+
+
+class AsyncDatabaseSession:
+    def __init__(self) -> None:
+        self._session = None
+        self._engine = None
+
+    def __getattr__(self, name):
+        return getattr(self._session, name)
+
+    def init(self):
+        self._engine = create_async_engine(DB_URL, echo=True)
+        self._session = sessionmaker(self._engine, expire_on_commit=False, class_=AsyncSession)()  # noqa
+
+    async def create_all(self):
+        async with self._engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    async def drop_all(self):
+        async with self._engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+
+
+db = AsyncDatabaseSession()
+db.init()
