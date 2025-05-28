@@ -44,3 +44,5 @@ class Message(Base):
     messages = Column(Text)
     created_at = Column(DateTime)
     user = relationship('User', backref='messages')
+
+

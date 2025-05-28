@@ -328,4 +328,7 @@ cython_debug/
 
 __pycache__
 
-tasks/*
+!tasks/daily_summary.py
+!tasks/month_summary.py
+!tasks/week_summary.py
+tasks/
