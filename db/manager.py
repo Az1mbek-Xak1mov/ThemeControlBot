@@ -70,11 +70,6 @@ async def save_message(values: dict):
     session.commit()
 
 
-async def get_messages_for_group(
-        group: Group,
-        days: int
-) -> list[Message]:
-    return await get_messages_for_chat(group.chat_id, days)
 
 
 # ─── GROUP–USER LINK ────────────────────────────────────────────────────────
@@ -83,17 +78,13 @@ async def get_users_in_group(group: Group) -> list[User]:
     return group.users
 
 
-async def add_user_to_group(
-        user_chat_id: int,
-        group_chat_id: int
-):
+async def add_user_to_group(user_chat_id: int, group_chat_id: int):
     stmt = pg_insert(group_user).values(
         group_chat_id=group_chat_id,
         user_chat_id=user_chat_id
     ).on_conflict_do_nothing(
-        index_elements=["group_chat_id", "user_chat_id"]
+        index_elements=['group_chat_id', 'user_chat_id']
     )
-
     session.execute(stmt)
     session.commit()
 
