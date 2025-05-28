@@ -1,11 +1,9 @@
 import datetime
 
 from sqlalchemy import select, insert, func
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, Session
-
-from db.engine import engine, DB_URL
-from db.models import User, Message, Group, group_user, Base
+from db.engine import engine
+from db.models import User, Message, Group, group_user
 
 # Create a scoped session
 SessionLocal: sessionmaker = sessionmaker(bind=engine)
@@ -65,7 +63,6 @@ async def save_user(values: dict) -> User:
 
 async def save_message(values: dict):
     text = values.get("messages", "")
-    print(text)
     if len(text) <= 3:
         return
     stmt = insert(Message).values(**values)
@@ -129,29 +126,5 @@ async def get_messages_for_chat(from_date, group_chat_id, user_chat_id) -> list[
     return result.scalar()
 
 
+
 ##################################33
-
-
-class AsyncDatabaseSession:
-    def __init__(self) -> None:
-        self._session = None
-        self._engine = None
-
-    def __getattr__(self, name):
-        return getattr(self._session, name)
-
-    def init(self):
-        self._engine = create_async_engine(DB_URL, echo=True)
-        self._session = sessionmaker(self._engine, expire_on_commit=False, class_=AsyncSession)()  # noqa
-
-    async def create_all(self):
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-    async def drop_all(self):
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-
-
-db = AsyncDatabaseSession()
-db.init()
