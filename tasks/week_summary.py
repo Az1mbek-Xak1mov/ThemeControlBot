@@ -1,3 +1,18 @@
+#!/usr/bin/env python3
+import os
+import sys
+
+from environment.utils import Env
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE)
+os.chdir(BASE)
+
+# optional, if you use .env:
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(BASE, ".env"))
+
 import asyncio
 
 from aiogram import Bot
@@ -33,7 +48,10 @@ async def create_activity_report(filename="weekly_report.xlsx"):
         total = await total_messages(7, group.chat_id)
         for info in info_user:
             count = await get_messages_for_chat(7, group.chat_id, info.chat_id, )
-            percent = f"{(100 / total * count):.2f}%"
+            if total!=0:
+                percent = f"{(100 / total * count):.2f}%"
+            else:
+                percent=0
             ws.append([info.name, f"@{info.username or 'Yoq'}", count, percent])
             helper.append([info.name, f"@{info.username or 'Yoq'}", count, percent])
 

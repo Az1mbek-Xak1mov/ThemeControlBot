@@ -42,7 +42,10 @@ async def create_activity_report(filename="daily_report.xlsx"):
         total = await total_messages(1, group.chat_id)
         for info in info_user:
             count = await get_messages_for_chat(1, group.chat_id, info.chat_id, )
-            percent = f"{(100 / total * count):.2f}%"
+            if total!=0:
+                percent = f"{(100 / total * count):.2f}%"
+            else:
+                percent=0
             if not info.username:
                 info.username = '-'
             helper.append([info.name, info.username, count, percent])
