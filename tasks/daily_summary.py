@@ -2,18 +2,14 @@
 import os
 import sys
 
-from environment.utils import Env
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
 os.chdir(BASE)
-
-# optional, if you use .env:
 from dotenv import load_dotenv
-
 load_dotenv(os.path.join(BASE, ".env"))
+from environment.utils import Env
 
-# … rest of your imports …
 
 import asyncio
 from aiogram import Bot
