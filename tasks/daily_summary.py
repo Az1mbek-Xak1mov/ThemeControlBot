@@ -1,26 +1,20 @@
-#!/usr/bin/env python3
 import os
 import sys
-
-
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
 os.chdir(BASE)
 from dotenv import load_dotenv
 load_dotenv(os.path.join(BASE, ".env"))
 from environment.utils import Env
-
-
 import asyncio
 from aiogram import Bot
 from aiogram.types import FSInputFile
-from db.manager import total_messages, get_messages_for_chat, get_all_groups, get_user_objects_for_group
 from openpyxl import Workbook
-
 admin_chat_id = Env().bot.ADMIN_CHAT_ID
 TOKEN = Env().bot.SUMMARY_TOKEN
 bot = Bot(TOKEN)
 
+from db.manager import total_messages, get_messages_for_chat, get_all_groups, get_user_objects_for_group
 
 async def create_activity_report(filename="daily_report.xlsx"):
     wb = Workbook()
