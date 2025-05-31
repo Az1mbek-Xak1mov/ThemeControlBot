@@ -49,7 +49,6 @@ async def create_activity_report(filename="monthly_report.xlsx"):
                 percent=0
             ws.append([info.name, f"@{info.username or 'Yoq'}", count, percent])
             helper.append([info.name, f"@{info.username or 'Yoq'}", count, percent])
-
         sorted_data = sorted(helper, key=lambda r: r[2], reverse=True)
 
         top5 = sorted_data[:5]
