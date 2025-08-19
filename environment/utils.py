@@ -1,6 +1,9 @@
 from os import getenv
 from dotenv import load_dotenv
 load_dotenv()
+
+class ADMIN:
+    ADMIN_CHAT_ID=getenv("ADMIN_CHAT_ID")
 class Bot:
     TOKEN = getenv("TOKEN")
     SUMMARY_TOKEN = getenv("SUMMARY_TOKEN")

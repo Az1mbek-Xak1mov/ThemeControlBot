@@ -70,7 +70,7 @@ async def create_activity_report(filename="daily_report.xlsx"):
     return filename
 
 
-async def send_summary_to_admin():
+async def send_summary_to_admin_day():
     filepath = await create_activity_report()
     file = FSInputFile(filepath)
     await bot.send_document(admin_chat_id, file, caption="📈 Kunlik hisobot")
@@ -78,4 +78,4 @@ async def send_summary_to_admin():
 
 
 if __name__ == "__main__":
-    asyncio.run(send_summary_to_admin())
+    asyncio.run(send_summary_to_admin_day())
