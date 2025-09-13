@@ -1,0 +1,110 @@
+Sizga kirish quyidagi aniq ko‘p qatorli formatda beriladi:
+Theme:<THEME>
+Message:<msg1>
+Message:<msg2>
+...
+Message:<msgN>
+
+Qoidalar (anavi tartibda va aniq bajarilsin):
+
+Birinchi qatordagi Theme qiymatini ajrating, lekin tasniflashda ishlatmang — faqat mavzuni bildiradi. Theme qatorini xabar matnidan OLIB TASHLANG.
+
+Tasniflash uchun faqat Message qatorlarini ishlating. Oxirgi Message qatori (Message:<msgN>) sinov ostidagi xabar — oldingi Message qatorlari faqat kontekst.
+
+Oxirgi xabar THEME bilan ANIQ bog‘liq bo‘lsa (semantik moslik, sinonimlar, mavzu bilan bog‘liq vazifa, misol kod, savol-javob, mavzu haqidagi qisqa minnatdorchilik va hk.) — javob sifatida faqat bitta token:
+on
+
+Oxirgi xabar THEME bilan aniq bog‘liq emas (boshqa mavzu, ijtimoiy small-talk mavzu bilan aloqasi yo‘q, tadbir/ovqat/uy rejalari va hk.) — javob sifatida faqat bitta token:
+out
+
+Agar noaniq yoki faqat tangensial bog‘liq bo‘lsa, konservativ yondashib ON-THEME deb hisoblang — ya'ni qaytaring:
+on
+
+Semantik tushunishni ishlating — faqat kalit so‘zlarga tayanmang. Kontekstdagi oldingi Message qatorlari noaniqlikni hal qilishga yordam beradi.
+
+Qabul qilinadigan salomlashish misollari (har qanday varianti ruxsat etiladi): nma gap, qalesz, salom, assalomu aleykum, iyu, hmmm, yoooooo, ha, yoq
+
+Chiqish faqat BIR QATOR va BIR TOKEN bo‘lsin: on yoki out. Hech qanday qo‘shimcha matn, izoh, bo‘sh joy yoki yangi qator bo‘lmasin.
+
+Misollar:
+Theme:Tog'ga chqamz
+Message:Nma gap
+Message:Tinc
+Message:1kishiga qanchadan tushadi?
+Message:Bilmadm ertaga ko'rishsak bo'larkan
+output (kutilgan): on
+
+Theme:Projectni baglarini tuzatish
+Message:Nma muommo
+Message:Rasmlarni yuklamayabdi
+Message:Chunarli
+Message:Obedga nma yeymiz
+output (kutilgan): out
+
+Theme:<THEME>
+Message:<msg1>
+Message:<msg2>
+...
+Message:<msgN>
+
+Вход приходит в точно таком многострочном формате:
+Правила (строго выполнять):
+
+Извлеките THEME из первой строки, но НЕ используйте её при классификации — удалите строку Theme из текста перед анализом.
+
+Для классификации используйте только строки Message. Последняя строка Message (Message:<msgN>) — тестовое сообщение; предыдущие — контекст.
+
+Если последнее сообщение ЯВНО относится к THEME (семантическое совпадение, синонимы, связанная задача, пример кода, Q&A, краткая благодарность по теме) — выведите ровно один токен:
+on
+
+Если последнее сообщение ЯВНО НЕ по теме (о другом предмете, светская болтовня, планы на еду/мероприятия и т.д.) — выведите ровно один токен:
+out
+
+Если неясно или лишь косвенно связано — консервативно считать ON-THEME и вернуть:
+on
+
+Пользуйтесь семантическим пониманием, а не только ключевыми словами.
+
+Допустимые приветствия (любой вариант разрешён):привет , че там , как дела , как там июю
+
+Вывод — только ОДНА строка с ОДНИМ токеном on или out. Никаких дополнительных слов, пояснений, пробелов или переводов строки.
+
+
+Theme:python web scraping
+Message:Как извлечь цены со страницы с помощью BeautifulSoup?
+Output:
+on
+
+Theme:python web scraping
+Message:Как извлечь цены со страницы с помощью BeautifulSoup?
+Message:Кто идёт на футбол завтра?
+Output:
+out
+
+Theme:исправление багов проекта
+Message:Не загружаются изображения в проекте
+Message:Логи показывают ошибку 500
+Message:Спасибо, помогло!
+Output:
+on
+
+Theme:исправление багов проекта
+Message:Не загружаются изображения в проекте
+Message:Логи показывают ошибку 500
+Message:Во сколько идём обедать?
+Output:
+out
+
+Theme:подарок на день рождения
+Message:У меня есть предложение по подарку
+Message:Рядом есть турецкий ресторан, может туда?
+Message:Отлично, берём тот вариант
+Output:
+on
+
+Theme:тестирование автоматизации
+Message:Тестовый скрипт падает на шаге авторизации
+Message:Проблема, вероятно, в селекторах
+Message:Привет, как дела?
+Output:
+out

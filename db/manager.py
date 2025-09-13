@@ -1,9 +1,9 @@
 import datetime
 
-from sqlalchemy import select, insert, func
+from sqlalchemy import select, insert, func, update, desc
 from sqlalchemy.orm import sessionmaker, Session
 from db.engine import engine
-from db.models import User, Message, Group, group_user
+from db.models import User, Message, Group, group_user, Theme
 
 # Create a scoped session
 SessionLocal: sessionmaker = sessionmaker(bind=engine)
@@ -62,17 +62,33 @@ async def save_user(values: dict) -> User:
 # ─── MESSAGES ───────────────────────────────────────────────────────────────
 
 async def save_message(values: dict):
-    text = values.get("messages", "")
-    if len(text) <= 3:
-        return
     stmt = insert(Message).values(**values)
     session.execute(stmt)
     session.commit()
 
 
+async def save_theme(values: dict):
+    stmt = insert(Theme).values(**values)
+    session.execute(stmt)
+    session.commit()
+    return
 
+async def get_ongoing_theme(chat_id: int) -> str | None:
+    stmt = select(Theme).where(Theme.chat_id == chat_id, Theme.status == 'ongoing')\
+                        .order_by(Theme.created_at.desc()).limit(1)
+    result = session.execute(stmt).scalars().first()
+    return result.title if result is not None else None
 
-# ─── GROUP–USER LINK ────────────────────────────────────────────────────────
+async def set_theme_done(chat_id: int):
+    stmt = (
+        update(Theme)
+        .where(Theme.chat_id == chat_id, Theme.status == 'ongoing')
+        .values(status='done')
+    )
+    res = session.execute(stmt)
+    session.commit()
+    return res.rowcount
+
 
 async def get_users_in_group(group: Group) -> list[User]:
     return group.users
@@ -108,14 +124,12 @@ async def total_messages(from_date, group_chat_id):
     return result.scalar()
 
 
-async def get_messages_for_chat(from_date, group_chat_id, user_chat_id) -> list[Message]:
-    now = datetime.datetime.now()
-    date_from = now - datetime.timedelta(days=from_date)
-    query = select(func.count(Message.id)).where(Message.created_at > date_from, Message.chat_id == group_chat_id,
-                                                 Message.user_id == user_chat_id)
+async def get_messages_for_chat(group_chat_id) -> list[str]:
+    query = (
+        select(Message.messages)
+        .where(Message.chat_id == group_chat_id)
+        .order_by(desc(Message.created_at))
+        .limit(3)
+    )
     result = session.execute(query)
-    return result.scalar()
-
-
-
-##################################33
+    return result.scalars().all()

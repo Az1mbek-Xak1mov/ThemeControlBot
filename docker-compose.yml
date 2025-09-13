@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  bot:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes:
+      - ./:/app:delegated
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: themecontrol_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "1"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+
+volumes:
+  pgdata:

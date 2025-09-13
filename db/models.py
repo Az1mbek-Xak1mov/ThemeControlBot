@@ -4,7 +4,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Text,
-    Table,
+    Table, Enum, text,
 )
 from sqlalchemy.orm import relationship
 
@@ -29,7 +29,7 @@ group_user = Table(
 )
 
 class User(Base):
-    __tablename__ = 'users'   # plural
+    __tablename__ = 'users'
     id       = Column(BigInteger, primary_key=True, autoincrement=True)
     chat_id  = Column(BigInteger, unique=True, nullable=False)
     name     = Column(Text)
@@ -37,17 +37,32 @@ class User(Base):
     groups   = relationship('Group', secondary=group_user, back_populates='users')
 
 class Group(Base):
-    __tablename__ = 'tg_groups'  # plural
+    __tablename__ = 'tg_groups'
     id      = Column(BigInteger, primary_key=True, autoincrement=True)
     chat_id = Column(BigInteger, unique=True, nullable=False)
     title   = Column(Text, nullable=False)
     users   = relationship('User', secondary=group_user, back_populates='groups')
 
 class Message(Base):
-    __tablename__ = 'messages'  # plural
+    __tablename__ = 'messages'
     id         = Column(BigInteger, primary_key=True, autoincrement=True)
     chat_id    = Column(BigInteger, nullable=False)
     user_id    = Column(BigInteger, ForeignKey('users.chat_id'))  # point at users.chat_id
     messages   = Column(Text)
     created_at = Column(DateTime)
     user       = relationship('User', backref='messages')
+
+class Theme(Base):
+    __tablename__ = 'themes'
+    id         = Column(BigInteger, primary_key=True, autoincrement=True)
+    chat_id    = Column(BigInteger, nullable=False)
+    user_id    = Column(BigInteger, ForeignKey('users.chat_id'))
+    title      = Column(Text)
+    created_at = Column(DateTime)
+    user       = relationship('User', backref='themes')
+    status = Column(
+        Enum('ongoing', 'done', name='theme_status'),
+        nullable=False,
+        default='ongoing',
+        server_default=text("'ongoing'")
+    )
