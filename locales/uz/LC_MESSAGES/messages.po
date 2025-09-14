@@ -1,0 +1,55 @@
+# Uzbek translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-09-14 14:12+0500\n"
+"PO-Revision-Date: 2025-09-14 12:01+0500\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: uz\n"
+"Language-Team: uz <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: bot/handler/main.py:28
+msgid "Tilni tanlang"
+msgstr ""
+
+#: bot/handler/main.py:32 bot/handler/main.py:58 bot/handler/main.py:76
+msgid "👥 Guruhlar"
+msgstr ""
+
+#: bot/handler/main.py:33 bot/handler/main.py:59 bot/handler/main.py:77
+msgid "🌐 Til"
+msgstr ""
+
+#: bot/handler/main.py:36 bot/handler/main.py:62 bot/handler/main.py:80
+msgid "Asosiy Menyu"
+msgstr ""
+
+#: bot/handler/main.py:46
+msgid "🌐 Tilni tanlang"
+msgstr ""
+
+#: bot/handler/main.py:68
+msgid "Guruhlar"
+msgstr ""
+
+#: bot/handler/main.py:69
+msgid "🔙 Orqaga"
+msgstr ""
+
+#: bot/handler/main.py:70
+msgid "⬅️ Asosiy panelga qaytish"
+msgstr ""
+
+#~ msgid "Salom"
+#~ msgstr ""
+

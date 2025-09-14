@@ -1,3 +1,5 @@
+import enum
+
 from sqlalchemy import (
     Column,
     BigInteger,
@@ -10,7 +12,6 @@ from sqlalchemy.orm import relationship
 
 from db.engine import Base
 
-# Association table for many-to-many relationship between Group and User
 group_user = Table(
     'group_users',
     Base.metadata,
@@ -29,12 +30,16 @@ group_user = Table(
 )
 
 class User(Base):
+    class LanguageEnum(enum.Enum):
+        uz = "uz"
+        ru = "ru"
     __tablename__ = 'users'
     id       = Column(BigInteger, primary_key=True, autoincrement=True)
     chat_id  = Column(BigInteger, unique=True, nullable=False)
     name     = Column(Text)
     username = Column(Text)
     groups   = relationship('Group', secondary=group_user, back_populates='users')
+    lang         = Column(Enum(LanguageEnum), nullable=False, default=LanguageEnum.uz)
 
 class Group(Base):
     __tablename__ = 'tg_groups'

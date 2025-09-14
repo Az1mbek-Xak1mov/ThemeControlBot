@@ -1,97 +1,79 @@
-import datetime
 from aiogram import F
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, BotCommand
-
-from ai.client import check_msg
+from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.utils.i18n import gettext as _
+from bot.buttons.reply import make_reply_btn
 from bot.dispatcher import dp, bot
-from bot.handler.chat_history import append_message_to_file, get_last_n_messages_from_file, delete_history_file
-from bot.states import NewThemeStates
-from db.manager import save_user, save_message, select_one, save_group, add_user_to_group, save_theme, set_theme_done, \
-    get_ongoing_theme
-import datetime
-from aiogram.types import Message, BotCommand
-from aiogram.filters import Command
-from aiogram.fsm.context import FSMContext
-
-async def set_bot_commands():
-    await bot.set_my_commands([
-        BotCommand("newtheme", "Create a new theme (groups only)"),
-        BotCommand("cancel", "Cancel current action"),
-    ])
+from bot.states import StepByStepStates
+from db.manager import select_one, save_user, update_lang, select_group_users
+from aiogram.utils.i18n import lazy_gettext as __
 
 
-@dp.message(Command(commands=["newtheme"]))
-async def cmd_newtheme_group(message: Message, state: FSMContext):
-    if message.chat.type in ("group", "supergroup"):
-        user_info = {
-            "chat_id": message.from_user.id,
-            "username": message.from_user.username or "",
-            "name": message.from_user.first_name or "",
-        }
+@dp.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    if not message.chat.type in ("group", "supergroup"):
         if not await select_one(message.from_user.id):
+            user_info = {
+                "chat_id": message.from_user.id,
+                "username": message.from_user.username or "",
+                "name": message.from_user.first_name or "",
+            }
             await save_user(user_info)
-        delete_history_file(message.chat.id)
-        await state.set_state(NewThemeStates.waiting_for_text)
-
-
-@dp.message(NewThemeStates.waiting_for_text)
-async def receive_newtheme_text(message: Message, state: FSMContext):
-    if message.chat.type in ("group", "supergroup"):
-        theme = {
-            "user_id": message.from_user.id,
-            "chat_id": message.chat.id,
-            "title": message.text,
-            "created_at": datetime.datetime.utcnow(),
-        }
-        await save_theme(theme)
-        await state.set_state(NewThemeStates.ongoing)
-
-
-
-@dp.message(Command(commands=["cancel"]))
-async def cancel_newtheme(message: Message, state: FSMContext):
-    if message.chat.type in ("group", "supergroup"):
-        delete_history_file(message.chat.id)
-        await state.clear()
-        await set_theme_done(message.chat.id)
-
-@dp.message()
-async def handle_message(message: Message, state: FSMContext):
-    theme_text = await get_ongoing_theme(message.chat.id)
-    if not theme_text or message.text.startswith("#out"):
-        return
-    try:
-        prev_msgs = get_last_n_messages_from_file(message.chat.id, n=3)
-    except Exception as e:
-        prev_msgs = []
-
-    combined_input_lines = [f"Theme:{theme_text}"]
-    for pm in prev_msgs:
-        combined_input_lines.append(f"Message:{pm}")
-    combined_input_lines.append(f"Message:{message.text}")
-    combined_input = "\n".join(combined_input_lines)
-
-    try:
-        is_off_topic = check_msg(combined_input)
-    except Exception as e:
-        is_off_topic = 'on'
-    if message.chat.type in ("group", "supergroup"):
-        if is_off_topic == 'out' and not message.text.startswith("#out"):
-            await message.delete()
+            language_menu = [
+                "🇺🇿 O‘zbekcha",
+                "🇷🇺 Русский",
+            ]
+            markup = make_reply_btn(language_menu, sizes=[2])
+            await message.answer(_("Tilni tanlang"), reply_markup=markup)
         else:
-            append_message_to_file(message.chat.id, message.text)
+            sizes = [2]
+            menu = [
+                _("👥 Guruhlar"),
+                _("🌐 Til"),
+            ]
+            markup = make_reply_btn(menu, sizes)
+            await message.answer(_("Asosiy Menyu"), reply_markup=markup)
 
-            grp = await save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
-            await add_user_to_group(
-                user_chat_id=message.from_user.id,
-                group_chat_id=grp.chat_id
-            )
-            if message.chat.type in ("group", "supergroup"):
-                message_info = {
-                    "user_id": message.from_user.id,
-                    "chat_id": message.chat.id,
-                    "messages": message.text,
-                    "created_at": datetime.datetime.utcnow(),
-                }
-                await save_message(message_info)
+
+@dp.message(F.text == __("🌐 Til"))
+async def show_language_menu(message: Message):
+    language_menu = [
+        "🇺🇿 O‘zbekcha",
+        "🇷🇺 Русский",
+    ]
+    markup = make_reply_btn(language_menu, sizes=[2])
+    await message.answer(_("🌐 Tilni tanlang"), reply_markup=markup)
+
+
+@dp.message(F.text.in_(["🇺🇿 O‘zbekcha","🇷🇺 Русский"]))
+async def handle_language_choice(message: Message, state: FSMContext, i18n):
+    selected = message.text
+    lang_code = "ru" if selected == "🇷🇺 Русский" else "uz"
+    await update_lang(message.from_user.id, lang_code)
+    await state.update_data(locale=lang_code)
+    i18n.current_locale = lang_code
+    sizes = [2]
+    menu = [
+        _("👥 Guruhlar"),
+        _("🌐 Til"),
+    ]
+    markup = make_reply_btn(menu, sizes)
+    await message.answer(_("Asosiy Menyu"), reply_markup=markup)
+
+@dp.message(F.text == __("👥 Guruhlar"))
+async def show_language_menu(message: Message):
+    group_titles = await select_group_users(message.chat.id)
+    formatted_output = ','.join(group_titles)
+    markup = make_reply_btn([_("🔙 Orqaga")], sizes=[1])
+    await message.answer(f"{_('👥 Guruhlar')}:{formatted_output}", reply_markup=markup)
+
+@dp.message(F.text==__("🔙 Orqaga"))
+async def back_panel(message:Message):
+    sizes = [2]
+    menu = [
+        _("👥 Guruhlar"),
+        _("🌐 Til"),
+    ]
+    markup = make_reply_btn(menu, sizes)
+    await message.answer(_("Asosiy Menyu"), reply_markup=markup)
