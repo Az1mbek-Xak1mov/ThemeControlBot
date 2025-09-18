@@ -28,6 +28,11 @@ async def cmd_newtheme_group(message: Message, state: FSMContext):
             "username": message.from_user.username or "",
             "name": message.from_user.first_name or "",
         }
+        grp = await save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
+        await add_user_to_group(
+            user_chat_id=message.from_user.id,
+            group_chat_id=grp.chat_id
+        )
         if not await select_one(message.from_user.id):
             await save_user(user_info)
         delete_history_file(message.chat.id)
