@@ -14,6 +14,7 @@ async def select_group(chat_id: int) -> Group | None:
     return session.execute(
         select(Group).where(Group.chat_id == chat_id)
     ).scalars().first()
+
 async def select_group_users(user_chat_id: int) -> list[dict]:
     stmt = (
             select(Group.chat_id, Group.title)
@@ -109,3 +110,7 @@ async def add_user_to_group(user_chat_id: int, group_chat_id: int):
     )
     session.execute(stmt)
     session.commit()
+
+async def get_all_group_chat_ids_async():
+    result = session.execute(select(Group.chat_id))
+    return result.scalars().all()
