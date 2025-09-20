@@ -23,11 +23,13 @@ async def set_bot_commands():
 @dp.message(Command(commands=["newtheme"]))
 async def cmd_newtheme_group(message: Message, state: FSMContext):
     if message.chat.type in ("group", "supergroup"):
+        await message.answer("1")
         user_info = {
             "chat_id": message.from_user.id,
             "username": message.from_user.username or "",
             "name": message.from_user.first_name or "",
         }
+        await message.answer("2")
         grp = await save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
         await add_user_to_group(
             user_chat_id=message.from_user.id,
@@ -42,6 +44,7 @@ async def cmd_newtheme_group(message: Message, state: FSMContext):
 @dp.message(NewThemeStates.waiting_for_text)
 async def receive_newtheme_text(message: Message, state: FSMContext):
     if message.chat.type in ("group", "supergroup"):
+        await message.answer("3")
         theme = {
             "user_id": message.from_user.id,
             "chat_id": message.chat.id,
@@ -56,6 +59,7 @@ async def receive_newtheme_text(message: Message, state: FSMContext):
 @dp.message(Command(commands=["cancel"]))
 async def cancel_newtheme(message: Message, state: FSMContext):
     if message.chat.type in ("group", "supergroup"):
+        await message.answer("4")
         delete_history_file(message.chat.id)
         await state.clear()
         await set_theme_done(message.chat.id)
@@ -63,6 +67,7 @@ async def cancel_newtheme(message: Message, state: FSMContext):
 @dp.message()
 async def handle_message(message: Message):
     if message.chat.type in ("group", "supergroup"):
+        await message.answer("5")
         theme_text = await get_ongoing_theme(message.chat.id)
         if not theme_text or message.text.startswith("#out"):
             return

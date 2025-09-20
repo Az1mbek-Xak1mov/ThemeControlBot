@@ -42,42 +42,45 @@ async def command_start_handler(message: Message) -> None:
 
 @dp.message(F.text == __("🌐 Til"))
 async def show_language_menu(message: Message):
-    language_menu = [
-        "🇺🇿 O‘zbekcha",
-        "🇷🇺 Русский",
-    ]
-    markup = make_reply_btn(language_menu, sizes=[2])
-    await message.answer(_("🌐 Tilni tanlang"), reply_markup=markup)
+    if not message.chat.type in ("group", "supergroup"):
 
+        language_menu = [
+            "🇺🇿 O‘zbekcha",
+            "🇷🇺 Русский",
+        ]
+        markup = make_reply_btn(language_menu, sizes=[2])
+        await message.answer(_("🌐 Tilni tanlang"), reply_markup=markup)
 
-@dp.message(F.text.in_(["🇺🇿 O‘zbekcha","🇷🇺 Русский"]))
-async def handle_language_choice(message: Message, state: FSMContext, i18n):
-    selected = message.text
-    lang_code = "ru" if selected == "🇷🇺 Русский" else "uz"
-    await update_lang(message.from_user.id, lang_code)
-    await state.update_data(locale=lang_code)
-    i18n.current_locale = lang_code
-    sizes = [2]
-    menu = [
-        _("👥 Guruhlar"),
-        _("🌐 Til"),
-    ]
-    markup = make_reply_btn(menu, sizes)
-    await message.answer(_("Asosiy Menyu"), reply_markup=markup)
+    @dp.message(F.text.in_(["🇺🇿 O‘zbekcha","🇷🇺 Русский"]))
+    async def handle_language_choice(message: Message, state: FSMContext, i18n):
+        selected = message.text
+        lang_code = "ru" if selected == "🇷🇺 Русский" else "uz"
+        await update_lang(message.from_user.id, lang_code)
+        await state.update_data(locale=lang_code)
+        i18n.current_locale = lang_code
+        sizes = [2]
+        menu = [
+            _("👥 Guruhlar"),
+            _("🌐 Til"),
+        ]
+        markup = make_reply_btn(menu, sizes)
+        await message.answer(_("Asosiy Menyu"), reply_markup=markup)
 
 @dp.message(F.text == __("👥 Guruhlar"))
 async def show_language_menu(message: Message):
-    group_titles = await select_group_users(message.chat.id)
-    formatted_output = ','.join(group_titles)
-    markup = make_reply_btn([_("🔙 Orqaga")], sizes=[1])
-    await message.answer(f"{_('👥 Guruhlar')}:{formatted_output}", reply_markup=markup)
+    if not message.chat.type in ("group", "supergroup"):
+        group_titles = await select_group_users(message.chat.id)
+        formatted_output = ','.join(group_titles)
+        markup = make_reply_btn([_("🔙 Orqaga")], sizes=[1])
+        await message.answer(f"{_('👥 Guruhlar')}:{formatted_output}", reply_markup=markup)
 
 @dp.message(F.text==__("🔙 Orqaga"))
 async def back_panel(message:Message):
-    sizes = [2]
-    menu = [
-        _("👥 Guruhlar"),
-        _("🌐 Til"),
-    ]
-    markup = make_reply_btn(menu, sizes)
-    await message.answer(_("Asosiy Menyu"), reply_markup=markup)
+    if not message.chat.type in ("group", "supergroup"):
+        sizes = [2]
+        menu = [
+            _("👥 Guruhlar"),
+            _("🌐 Til"),
+        ]
+        markup = make_reply_btn(menu, sizes)
+        await message.answer(_("Asosiy Menyu"), reply_markup=markup)
