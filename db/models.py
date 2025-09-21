@@ -48,14 +48,6 @@ class Group(Base):
     title   = Column(Text, nullable=False)
     users   = relationship('User', secondary=group_user, back_populates='groups')
 
-class Message(Base):
-    __tablename__ = 'messages'
-    id         = Column(BigInteger, primary_key=True, autoincrement=True)
-    chat_id    = Column(BigInteger, nullable=False)
-    user_id    = Column(BigInteger, ForeignKey('users.chat_id'))  # point at users.chat_id
-    messages   = Column(Text)
-    created_at = Column(DateTime)
-    user       = relationship('User', backref='messages')
 
 class Theme(Base):
     __tablename__ = 'themes'

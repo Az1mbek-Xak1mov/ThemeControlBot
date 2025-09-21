@@ -3,7 +3,7 @@ import datetime
 from sqlalchemy import select, insert, func, update, desc
 from sqlalchemy.orm import sessionmaker, Session
 from db.engine import engine
-from db.models import User, Message, Group, group_user, Theme
+from db.models import User, Group, group_user, Theme
 
 SessionLocal: sessionmaker = sessionmaker(bind=engine)
 session: Session = SessionLocal()
@@ -62,11 +62,6 @@ def select_lang(chat_id: int) -> str | None:
     ).scalars().first()
     return enum_val.value if enum_val else None
 
-def save_message(values: dict):
-    stmt = insert(Message).values(**values)
-    session.execute(stmt)
-    session.commit()
-
 
 def save_theme(values: dict):
     stmt = insert(Theme).values(**values)
@@ -89,7 +84,6 @@ def set_theme_done(chat_id: int):
     res = session.execute(stmt)
     session.commit()
     return res.rowcount
-
 
 
 def update_lang(chat_id: int, lang: str) -> None:

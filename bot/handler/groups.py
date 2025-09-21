@@ -6,7 +6,7 @@ from ai.client import check_msg
 from bot.dispatcher import dp, bot
 from bot.handler.chat_history import append_message_to_file, get_last_n_messages_from_file, delete_history_file
 from bot.states import NewThemeStates
-from db.manager import save_user, save_message, select_one, save_group, add_user_to_group, save_theme, set_theme_done, \
+from db.manager import save_user, select_one, save_group, add_user_to_group, save_theme, set_theme_done, \
     get_ongoing_theme
 import datetime
 from aiogram.types import Message, BotCommand
@@ -28,13 +28,13 @@ async def cmd_newtheme_group(message: Message, state: FSMContext):
             "username": message.from_user.username or "",
             "name": message.from_user.first_name or "",
         }
+        if not select_one(message.from_user.id):
+            save_user(user_info)
         grp = save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
         add_user_to_group(
             user_chat_id=message.from_user.id,
             group_chat_id=grp.chat_id
         )
-        if not select_one(message.from_user.id):
-            save_user(user_info)
         delete_history_file(message.chat.id)
         await state.set_state(NewThemeStates.waiting_for_text)
 
@@ -89,10 +89,4 @@ async def handle_message(message: Message):
                 user_chat_id=message.from_user.id,
                 group_chat_id=grp.chat_id
             )
-            message_info = {
-                "user_id": message.from_user.id,
-                "chat_id": message.chat.id,
-                "messages": message.text,
-                "created_at": datetime.datetime.utcnow(),
-            }
-            save_message(message_info)
+

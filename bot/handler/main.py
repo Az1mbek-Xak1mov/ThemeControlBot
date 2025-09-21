@@ -12,11 +12,6 @@ from aiogram.utils.i18n import lazy_gettext as __
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     if not message.chat.type in ("group", "supergroup"):
-        gids = get_all_group_chat_ids_async()
-        for gid in gids:
-            member = await bot.get_chat_member(gid, message.from_user.id)
-            if member.status in ("member", "administrator", "creator"):
-                add_user_to_group(message.from_user.id,gid)
         if not select_one(message.from_user.id):
             user_info = {
                 "chat_id": message.from_user.id,
@@ -24,6 +19,11 @@ async def command_start_handler(message: Message) -> None:
                 "name": message.from_user.first_name or "",
             }
             save_user(user_info)
+        gids = get_all_group_chat_ids_async()
+        for gid in gids:
+            member = await bot.get_chat_member(gid, message.from_user.id)
+            if member.status in ("member", "administrator", "creator"):
+                add_user_to_group(message.from_user.id,gid)
             language_menu = [
                 "🇺🇿 O‘zbekcha",
                 "🇷🇺 Русский",
