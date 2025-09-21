@@ -12,7 +12,7 @@ from aiogram.utils.i18n import lazy_gettext as __
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     if not message.chat.type in ("group", "supergroup"):
-        if not select_one(message.from_user.id):
+        if not await select_one(message.from_user.id):
             user_info = {
                 "chat_id": message.from_user.id,
                 "username": message.from_user.username or "",
