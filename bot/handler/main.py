@@ -18,7 +18,7 @@ async def command_start_handler(message: Message) -> None:
                 "username": message.from_user.username or "",
                 "name": message.from_user.first_name or "",
             }
-            save_user(user_info)
+            await save_user(user_info)
             language_menu = [
                 "🇺🇿 O‘zbekcha",
                 "🇷🇺 Русский",
@@ -33,11 +33,11 @@ async def command_start_handler(message: Message) -> None:
             ]
             markup = make_reply_btn(menu, sizes)
             await message.answer(_("Asosiy Menyu"), reply_markup=markup)
-            gids = get_all_group_chat_ids_async()
+            gids = await get_all_group_chat_ids_async()
             for gid in gids:
                 member = await bot.get_chat_member(gid, message.from_user.id)
                 if member.status in ("member", "administrator", "creator"):
-                    add_user_to_group(message.from_user.id,gid)
+                    await add_user_to_group(message.from_user.id,gid)
 
 
 
@@ -57,7 +57,7 @@ async def handle_language_choice(message: Message, state: FSMContext, i18n):
     if not message.chat.type in ("group", "supergroup"):
         selected = message.text
         lang_code = "ru" if selected == "🇷🇺 Русский" else "uz"
-        update_lang(message.from_user.id, lang_code)
+        await update_lang(message.from_user.id, lang_code)
         await state.update_data(locale=lang_code)
         i18n.current_locale = lang_code
         sizes = [2]

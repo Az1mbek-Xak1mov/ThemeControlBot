@@ -28,10 +28,10 @@ async def cmd_newtheme_group(message: Message, state: FSMContext):
             "username": message.from_user.username or "",
             "name": message.from_user.first_name or "",
         }
-        if not select_one(message.from_user.id):
-            save_user(user_info)
+        if not await select_one(message.from_user.id):
+            await save_user(user_info)
         grp = save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
-        add_user_to_group(
+        await add_user_to_group(
             user_chat_id=message.from_user.id,
             group_chat_id=grp.chat_id
         )
@@ -48,7 +48,7 @@ async def receive_newtheme_text(message: Message, state: FSMContext):
             "title": message.text,
             "created_at": datetime.datetime.utcnow(),
         }
-        save_theme(theme)
+        await save_theme(theme)
         await state.set_state(NewThemeStates.ongoing)
 
 
@@ -57,7 +57,7 @@ async def cancel_newtheme(message: Message, state: FSMContext):
     if message.chat.type in ("group", "supergroup"):
         delete_history_file(message.chat.id)
         await state.clear()
-        set_theme_done(message.chat.id)
+        await set_theme_done(message.chat.id)
 
 @dp.message()
 async def handle_message(message: Message):
@@ -85,7 +85,7 @@ async def handle_message(message: Message):
         else:
             append_message_to_file(message.chat.id, message.text)
             grp = save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
-            add_user_to_group(
+            await add_user_to_group(
                 user_chat_id=message.from_user.id,
                 group_chat_id=grp.chat_id
             )

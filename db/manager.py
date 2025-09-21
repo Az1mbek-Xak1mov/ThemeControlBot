@@ -10,12 +10,12 @@ session: Session = SessionLocal()
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 
-def select_group(chat_id: int) -> Group | None:
+async def select_group(chat_id: int) -> Group | None:
     return session.execute(
         select(Group).where(Group.chat_id == chat_id)
     ).scalars().first()
 
-def select_group_users(user_chat_id: int) -> list[dict]:
+async def select_group_users(user_chat_id: int) -> list[dict]:
     stmt = (
             select(Group.chat_id, Group.title)
             .join(group_user, group_user.c.group_chat_id == Group.chat_id)
@@ -25,7 +25,7 @@ def select_group_users(user_chat_id: int) -> list[dict]:
     rows = result.fetchall()
     return [row.title for row in rows]
 
-def save_group(chat_id: int, title: str) -> Group:
+async def save_group(chat_id: int, title: str) -> Group:
     grp = select_group(chat_id)
     if grp:
         if grp.title != title:
@@ -40,13 +40,13 @@ def save_group(chat_id: int, title: str) -> Group:
 
 
 
-def select_one(user_chat_id: int) -> User | None:
+async def select_one(user_chat_id: int) -> User | None:
     return session.execute(
         select(User).where(User.chat_id == user_chat_id)
     ).scalars().first()
 
 
-def save_user(values: dict) -> User:
+async def save_user(values: dict) -> User:
     existing = select_one(values["chat_id"])
     if existing:
         return existing
@@ -56,26 +56,26 @@ def save_user(values: dict) -> User:
     return select_one(values["chat_id"])
 
 
-def select_lang(chat_id: int) -> str | None:
+async def select_lang(chat_id: int) -> str | None:
     enum_val = session.execute(
         select(User.lang).where(User.chat_id == chat_id)
     ).scalars().first()
     return enum_val.value if enum_val else None
 
 
-def save_theme(values: dict):
+async def save_theme(values: dict):
     stmt = insert(Theme).values(**values)
     session.execute(stmt)
     session.commit()
     return
 
-def get_ongoing_theme(chat_id: int) -> str | None:
+async def get_ongoing_theme(chat_id: int) -> str | None:
     stmt = select(Theme).where(Theme.chat_id == chat_id, Theme.status == 'ongoing')\
                         .order_by(Theme.created_at.desc()).limit(1)
     result = session.execute(stmt).scalars().first()
     return result.title if result is not None else None
 
-def set_theme_done(chat_id: int):
+async def set_theme_done(chat_id: int):
     stmt = (
         update(Theme)
         .where(Theme.chat_id == chat_id, Theme.status == 'ongoing')
@@ -86,7 +86,7 @@ def set_theme_done(chat_id: int):
     return res.rowcount
 
 
-def update_lang(chat_id: int, lang: str) -> None:
+async def update_lang(chat_id: int, lang: str) -> None:
     stmt = (
         update(User)
         .where(User.chat_id == chat_id)
@@ -95,7 +95,7 @@ def update_lang(chat_id: int, lang: str) -> None:
     session.execute(stmt)
     session.commit()
 
-def add_user_to_group(user_chat_id: int, group_chat_id: int):
+async def add_user_to_group(user_chat_id: int, group_chat_id: int):
     stmt = pg_insert(group_user).values(
         group_chat_id=group_chat_id,
         user_chat_id=user_chat_id
@@ -105,6 +105,6 @@ def add_user_to_group(user_chat_id: int, group_chat_id: int):
     session.execute(stmt)
     session.commit()
 
-def get_all_group_chat_ids_async():
+async def get_all_group_chat_ids_async():
     result = session.execute(select(Group.chat_id))
     return result.scalars().all()
