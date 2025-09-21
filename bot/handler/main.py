@@ -19,11 +19,6 @@ async def command_start_handler(message: Message) -> None:
                 "name": message.from_user.first_name or "",
             }
             save_user(user_info)
-        gids = get_all_group_chat_ids_async()
-        for gid in gids:
-            member = await bot.get_chat_member(gid, message.from_user.id)
-            if member.status in ("member", "administrator", "creator"):
-                add_user_to_group(message.from_user.id,gid)
             language_menu = [
                 "🇺🇿 O‘zbekcha",
                 "🇷🇺 Русский",
@@ -38,6 +33,12 @@ async def command_start_handler(message: Message) -> None:
             ]
             markup = make_reply_btn(menu, sizes)
             await message.answer(_("Asosiy Menyu"), reply_markup=markup)
+            gids = get_all_group_chat_ids_async()
+            for gid in gids:
+                member = await bot.get_chat_member(gid, message.from_user.id)
+                if member.status in ("member", "administrator", "creator"):
+                    add_user_to_group(message.from_user.id,gid)
+
 
 
 @dp.message(F.text == __("🌐 Til"))
