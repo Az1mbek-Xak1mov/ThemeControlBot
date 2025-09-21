@@ -71,7 +71,7 @@ async def handle_language_choice(message: Message, state: FSMContext, i18n):
 @dp.message(F.text == __("👥 Guruhlar"))
 async def show_language_menu(message: Message):
     if not message.chat.type in ("group", "supergroup"):
-        group_titles = select_group_users(message.chat.id)
+        group_titles = await select_group_users(message.chat.id)
         formatted_output = ','.join(group_titles)
         markup = make_reply_btn([_("🔙 Orqaga")], sizes=[1])
         await message.answer(f"{_('👥 Guruhlar')}:{formatted_output}", reply_markup=markup)

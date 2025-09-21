@@ -30,7 +30,7 @@ async def cmd_newtheme_group(message: Message, state: FSMContext):
         }
         if not await select_one(message.from_user.id):
             await save_user(user_info)
-        grp = save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
+        grp = await save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
         await add_user_to_group(
             user_chat_id=message.from_user.id,
             group_chat_id=grp.chat_id
@@ -62,7 +62,7 @@ async def cancel_newtheme(message: Message, state: FSMContext):
 @dp.message()
 async def handle_message(message: Message):
     if message.chat.type in ("group", "supergroup"):
-        theme_text = get_ongoing_theme(message.chat.id)
+        theme_text = await get_ongoing_theme(message.chat.id)
         if not theme_text or message.text.startswith("#out"):
             return
         try:
@@ -84,7 +84,7 @@ async def handle_message(message: Message):
             await message.delete()
         else:
             append_message_to_file(message.chat.id, message.text)
-            grp = save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
+            grp = await save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
             await add_user_to_group(
                 user_chat_id=message.from_user.id,
                 group_chat_id=grp.chat_id
