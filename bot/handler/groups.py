@@ -22,9 +22,7 @@ async def set_bot_commands():
 
 @dp.message(Command(commands=["newtheme"]))
 async def cmd_newtheme_group(message: Message, state: FSMContext):
-    await message.answer("Not inside group newtheme")
     if message.chat.type in ("group", "supergroup"):
-        await message.answer("Inside group newtheme")
         user_info = {
             "chat_id": message.from_user.id,
             "username": message.from_user.username or "",
@@ -43,9 +41,7 @@ async def cmd_newtheme_group(message: Message, state: FSMContext):
 
 @dp.message(NewThemeStates.waiting_for_text)
 async def receive_newtheme_text(message: Message, state: FSMContext):
-    await message.answer("Not Inside group name of theme")
     if message.chat.type in ("group", "supergroup"):
-        await message.answer("Inside group name of theme")
         theme = {
             "user_id": message.from_user.id,
             "chat_id": message.chat.id,
@@ -58,9 +54,7 @@ async def receive_newtheme_text(message: Message, state: FSMContext):
 
 @dp.message(Command(commands=["cancel"]))
 async def cancel_newtheme(message: Message, state: FSMContext):
-    await message.answer("Not Inside group cancel")
     if message.chat.type in ("group", "supergroup"):
-        await message.answer("Inside group cancel")
         delete_history_file(message.chat.id)
         await state.clear()
         set_theme_done(message.chat.id)
@@ -68,7 +62,6 @@ async def cancel_newtheme(message: Message, state: FSMContext):
 @dp.message()
 async def handle_message(message: Message):
     if message.chat.type in ("group", "supergroup"):
-        await message.answer("Inside group chat")
         theme_text = get_ongoing_theme(message.chat.id)
         if not theme_text or message.text.startswith("#out"):
             return
