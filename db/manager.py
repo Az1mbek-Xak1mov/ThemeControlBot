@@ -26,7 +26,7 @@ async def select_group_users(user_chat_id: int) -> list[dict]:
     return [row.title for row in rows]
 
 async def save_group(chat_id: int, title: str) -> Group:
-    grp = select_group(chat_id)
+    grp = await select_group(chat_id)
     if grp:
         if grp.title != title:
             grp.title = title
@@ -36,7 +36,7 @@ async def save_group(chat_id: int, title: str) -> Group:
     stmt = insert(Group).values(chat_id=chat_id, title=title)
     session.execute(stmt)
     session.commit()
-    return select_group(chat_id)
+    return await select_group(chat_id)
 
 
 
@@ -47,13 +47,13 @@ async def select_one(user_chat_id: int) -> User | None:
 
 
 async def save_user(values: dict) -> User:
-    existing = select_one(values["chat_id"])
+    existing = await select_one(values["chat_id"])
     if existing:
         return existing
     stmt = insert(User).values(**values)
     session.execute(stmt)
     session.commit()
-    return select_one(values["chat_id"])
+    return await select_one(values["chat_id"])
 
 
 async def select_lang(chat_id: int) -> str | None:
