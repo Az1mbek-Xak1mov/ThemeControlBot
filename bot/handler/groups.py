@@ -22,48 +22,54 @@ async def set_bot_commands():
 
 @dp.message(Command(commands=["newtheme"]))
 async def cmd_newtheme_group(message: Message, state: FSMContext):
+    await message.answer("Not inside group newtheme")
     if message.chat.type in ("group", "supergroup"):
+        await message.answer("Inside group newtheme")
         user_info = {
             "chat_id": message.from_user.id,
             "username": message.from_user.username or "",
             "name": message.from_user.first_name or "",
         }
-        grp = await save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
-        await add_user_to_group(
+        grp = save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
+        add_user_to_group(
             user_chat_id=message.from_user.id,
             group_chat_id=grp.chat_id
         )
-        if not await select_one(message.from_user.id):
-            await save_user(user_info)
+        if not select_one(message.from_user.id):
+            save_user(user_info)
         delete_history_file(message.chat.id)
         await state.set_state(NewThemeStates.waiting_for_text)
 
 
 @dp.message(NewThemeStates.waiting_for_text)
 async def receive_newtheme_text(message: Message, state: FSMContext):
+    await message.answer("Not Inside group name of theme")
     if message.chat.type in ("group", "supergroup"):
+        await message.answer("Inside group name of theme")
         theme = {
             "user_id": message.from_user.id,
             "chat_id": message.chat.id,
             "title": message.text,
             "created_at": datetime.datetime.utcnow(),
         }
-        await save_theme(theme)
+        save_theme(theme)
         await state.set_state(NewThemeStates.ongoing)
-
 
 
 @dp.message(Command(commands=["cancel"]))
 async def cancel_newtheme(message: Message, state: FSMContext):
+    await message.answer("Not Inside group cancel")
     if message.chat.type in ("group", "supergroup"):
+        await message.answer("Inside group cancel")
         delete_history_file(message.chat.id)
         await state.clear()
-        await set_theme_done(message.chat.id)
+        set_theme_done(message.chat.id)
 
 @dp.message()
 async def handle_message(message: Message):
     if message.chat.type in ("group", "supergroup"):
-        theme_text = await get_ongoing_theme(message.chat.id)
+        await message.answer("Inside group chat")
+        theme_text = get_ongoing_theme(message.chat.id)
         if not theme_text or message.text.startswith("#out"):
             return
         try:
@@ -85,8 +91,8 @@ async def handle_message(message: Message):
             await message.delete()
         else:
             append_message_to_file(message.chat.id, message.text)
-            grp = await save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
-            await add_user_to_group(
+            grp = save_group(message.chat.id, message.chat.title or f"Group {message.chat.id}")
+            add_user_to_group(
                 user_chat_id=message.from_user.id,
                 group_chat_id=grp.chat_id
             )
@@ -96,4 +102,4 @@ async def handle_message(message: Message):
                 "messages": message.text,
                 "created_at": datetime.datetime.utcnow(),
             }
-            await save_message(message_info)
+            save_message(message_info)
